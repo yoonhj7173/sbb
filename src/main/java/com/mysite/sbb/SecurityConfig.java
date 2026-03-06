@@ -18,16 +18,22 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-            .requestMatchers("/**").permitAll())
+        http
+            // 1. 비로그인 출입 허용 권한 설정
+            .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
+                .requestMatchers("/**").permitAll())
+            // 2. CSRF 보안 예외 설정
             .csrf((csrf) -> csrf
                 .ignoringRequestMatchers(("/h2-console/**")))
+            // 3. 헤더 보안 (H2 콘솔 화면 깨짐 방지)
             .headers((headers) -> headers
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(
                     XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
+            // 4. 로그인 설정
             .formLogin((formLogin) -> formLogin
                 .loginPage("/user/login")
                 .defaultSuccessUrl("/"))
+            // 5. 로그아웃 설정
             .logout((logout) -> logout
                 .logoutUrl("/user/logout")
                 .logoutSuccessUrl("/")
